@@ -34,7 +34,7 @@
         
         <div class="chat-box" id="chatBox">
             <div class="chat-messages" id="chatMessages">
-                <div class="msg bot">Halo! Saya SuperRazor.ai, asisten cerdas 24 jam nonstop milikmu. Mau nanya apa hari ini? ⚡</div>
+                <div class="msg bot">Halo! Saya SuperRazor.ai, asisten AI 24 jam nonstop milikmu. Ada yang bisa dibantu? ⚡</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="userInput" placeholder="Tanya apa saja secara bebas..." onkeypress="handleKeyPress(event)">
@@ -44,6 +44,9 @@
     </div>
 
     <script>
+        // API Key asli dari Google AI Studio milikmu sudah dipasang langsung di bawah ini!
+        const API_KEY = "AIzaSyDNSUVvImdSnPFHU8_zZJBFXI4UpEDOj9Y"; 
+
         function aktifkanChat() {
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('chatBox').style.display = 'flex';
@@ -56,6 +59,7 @@
 
             let chatMessages = document.getElementById('chatMessages');
 
+            // Tampilkan pesan User
             let userDiv = document.createElement('div');
             userDiv.className = 'msg user';
             userDiv.innerText = pesanText;
@@ -64,25 +68,22 @@
             inputField.value = ""; 
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
+            // Tampilkan status mengetik
             let loadingDiv = document.createElement('div');
             loadingDiv.className = 'msg bot';
-            loadingDiv.innerText = "SuperRazor sedang mengetik...";
+            loadingDiv.innerText = "SuperRazor sedang berpikir...";
             chatMessages.appendChild(loadingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             try {
-                // Perintah pelindung identitas AI rahasia
-                const promptSistem = "Kamu adalah SuperRazor.ai, asisten AI masa depan yang cerdas, gaul, santai, dan diciptakan oleh seorang Developer keren pengguna laptop Asus bernama Takashi Ro Raymond. JANGAN PERNAH sebut nama Google, Gemini, OpenAI, ChatGPT, atau Chatmo. Sembunyikan identitas aslimu rapat-rapat. Jawablah dengan bahasa Indonesia yang seru dan natural.";
+                // Perintah pelindung agar otak aslinya tetap rahasia total
+                const promptSistem = "Kamu adalah SuperRazor.ai, asisten AI masa depan yang cerdas, gaul, santai, dan diciptakan oleh seorang Developer keren pengguna laptop Asus bernama Takashi Ro Raymond. JANGAN PERNAH sebut nama Google, Gemini, OpenAI, atau ChatGPT. Sembunyikan identitas aslimu rapat-rapat. Jawablah dengan bahasa Indonesia yang seru, asyik, dan natural.";
 
-                const response = await fetch('https://api.chatmo.tech/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "gpt-4o-mini",
-                        messages: [
-                            { role: "system", content: promptSistem },
-                            { role: "user", content: pesanText }
-                        ]
+                        contents: [{ parts: [{ text: `${promptSistem}\n\nPertanyaan: ${pesanText}` }] }]
                     })
                 });
 
@@ -92,10 +93,10 @@
                 let botDiv = document.createElement('div');
                 botDiv.className = 'msg bot';
                 
-                if (data.choices && data.choices[0].message.content) {
-                    botDiv.innerText = data.choices[0].message.content;
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    botDiv.innerText = data.candidates[0].content.parts[0].text;
                 } else {
-                    botDiv.innerText = "Sistem sedang mengkalibrasi ulang. Coba kirim pesan lagi!";
+                    botDiv.innerText = "Sistem SuperRazor mendeteksi antrean padat. Coba ketik lagi ya!";
                 }
 
                 chatMessages.appendChild(botDiv);
@@ -105,7 +106,7 @@
                 chatMessages.removeChild(loadingDiv);
                 let errorDiv = document.createElement('div');
                 errorDiv.className = 'msg bot';
-                errorDiv.innerText = "Koneksi satelit dialihkan. Coba kirim ulang pesanmu, Bos!";
+                errorDiv.innerText = "Gagal terhubung ke satelit SuperRazor. Silakan coba lagi!";
                 chatMessages.appendChild(errorDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
